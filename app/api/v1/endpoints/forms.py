@@ -4,7 +4,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud import crud_form
+from app.crud import crud_form, crud_response
 from app.models import  user
 from app.schemas import form as form_schema
 from app.dependencies import get_current_user, get_db
@@ -33,7 +33,7 @@ async def create_form(
     return form
 
 
-@router.get("/", response_model=List[form_schema.Form])
+@router.get("/", response_model=List[form_schema.FormSummary])
 async def read_forms(
     db: AsyncSession = Depends(get_db),
     skip: int = Query(0, ge=0),
@@ -41,11 +41,14 @@ async def read_forms(
     current_user: user.User = Depends(get_current_user),
 ):
     """
-    Retrieve forms owned by the current user.
+    Retrieve forms owned by the current user, each with its response count.
     """
     forms = await crud_form.get_forms_by_owner(
         db=db, owner_id=current_user.id, skip=skip, limit=limit
     )
+    counts = await crud_response.get_response_counts(db=db, form_ids=[form.id for form in forms])
+    for form in forms:
+        form.response_count = counts.get(form.id, 0)
     return forms
 
 

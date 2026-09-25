@@ -68,6 +68,11 @@ class Form(FormInDBBase):
     owner: User # Include owner information
 
 
+# Properties returned when listing forms (includes aggregate stats)
+class FormSummary(Form):
+    response_count: int = 0
+
+
 # Properties stored in DB
 class FormInDB(FormInDBBase):
     pass
