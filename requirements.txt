@@ -1,10 +1,12 @@
-fastapi[all]
-sqlalchemy[asyncio]
-asyncpg
-psycopg2-binary
-alembic
-pydantic-settings
-python-jose[cryptography]
-passlib[bcrypt]
-python-dotenv
-email-validator
+fastapi[all]==0.141.1
+sqlalchemy[asyncio]==2.1.0
+asyncpg==0.31.0
+psycopg2-binary==2.9.13
+alembic==1.20.0
+pydantic-settings==2.15.0
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4
+# passlib 1.7.4 is incompatible with bcrypt>=4.1 (password hashing raises on startup self-test)
+bcrypt==4.0.1
+python-dotenv==1.2.3
+email-validator==2.3.0
