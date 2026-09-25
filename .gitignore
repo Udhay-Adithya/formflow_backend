@@ -1,5 +1,4 @@
 .env
-alembic.ini
 alembic/__pycache__/
 alembic/versions/__pycache__/
 app/db/__pycache__/
@@ -10,3 +9,5 @@ app/api/v1/endpoints/__pycache__/
 app/core/__pycache__/
 app/crud/__pycache__/
 app/schemas/__pycache__/
+__pycache__/
+*.py[cod]

@@ -8,6 +8,7 @@ from app.schemas import response as response_schema
 from app.crud import crud_form, crud_response
 from app.models import user as user_model
 from app.dependencies import get_current_user, get_db # Assuming responses might need auth later
+from app.services.response_validation import validate_response
 
 router = APIRouter()
 
@@ -36,13 +37,13 @@ async def create_response_for_form(
     #    # If requireLogin is true, you'd need a current_user dependency
     #    pass
 
-    # 2. TODO: Add Server-Side Validation
-    #    Compare response_in.data keys/values against form.data["fields"] definition
-    #    - Check required fields are present
-    #    - Check data types (e.g., email format)
-    #    - Check against options for multiple_choice/dropdown/checkbox
-    #    - Check minLength/maxLength etc.
-    #    If validation fails, raise HTTPException 400 Bad Request
+    # 2. Validate answers against the form definition (required, types, options, lengths)
+    errors = validate_response(form.data, response_in.data)
+    if errors:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"message": "Some answers are invalid", "errors": errors},
+        )
 
     # 3. Create the response
     response = await crud_response.create_response(

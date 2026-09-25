@@ -1,6 +1,7 @@
 import uuid
 from typing import List, Optional, Dict, Any
 
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -49,6 +50,23 @@ async def get_responses_by_form(
         .order_by(Response.created_at.asc()) # Often oldest first for responses
     )
     return result.scalars().all()
+
+
+async def get_response_counts(
+    db: AsyncSession, *, form_ids: List[uuid.UUID]
+) -> Dict[uuid.UUID, int]:
+    """
+    Count responses for several forms in a single grouped query (avoids N+1 queries).
+    Forms with no responses are absent from the result.
+    """
+    if not form_ids:
+        return {}
+    result = await db.execute(
+        select(Response.form_id, func.count(Response.id))
+        .filter(Response.form_id.in_(form_ids))
+        .group_by(Response.form_id)
+    )
+    return {form_id: count for form_id, count in result.all()}
 
 # Update/Delete for responses are less common for end-users,
 # but could be added for admins/owners later.
