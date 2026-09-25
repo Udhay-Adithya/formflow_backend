@@ -9,15 +9,9 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-origins = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "*",  # Not safe for production, but okay for quick testing
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # or ["*"] to allow all origins
+    allow_origins=settings.cors_origins_list,  # explicit allowlist, configured via CORS_ORIGINS
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
