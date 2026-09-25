@@ -16,6 +16,7 @@ class FormField(BaseModel):
     type: str = Field(..., examples=["text", "email", "multiple_choice", "checkbox", "dropdown", "textarea", "description"])
     order: int
     label: Optional[str] = None # Label might not exist for 'description' type
+    description: Optional[str] = None # Helper text shown under the label
     required: Optional[bool] = False
     placeholder: Optional[str] = None
     minLength: Optional[int] = None
