@@ -17,6 +17,9 @@
 *   **Dynamic Forms:** Define complex form structures with various field types (text, email, multiple choice, etc.) via JSON.
 *   **Form CRUD:** Full Create, Read, Update, and Delete operations for forms, restricted to owners.
 *   **Response Handling:** Submit responses to forms and retrieve collected responses (owner-only access).
+*   **Server-Side Validation:** Submissions are checked against the form definition (required fields, types, options, lengths, ranges) and rejected with per-field errors.
+*   **Sample Form:** Every new account starts with a sample form, created in the same transaction as the user.
+*   **Response Counts:** Form listings include response counts computed with a single grouped query.
 *   **Asynchronous:** Built with `asyncio`, `FastAPI`, and `SQLAlchemy`'s async support for high performance.
 *   **Data Validation:** Leverages Pydantic for robust request and response data validation.
 *   **Database Migrations:** Uses Alembic for managing database schema changes.
@@ -49,11 +52,12 @@ form_builder_backend/
 │   ├── db/                    # Database setup (session, base model)
 │   ├── models/                # SQLAlchemy ORM models
 │   ├── schemas/               # Pydantic schemas (data validation)
+│   ├── services/              # Business logic (response validation, sample form)
 │   ├── dependencies.py        # FastAPI dependencies
 │   └── main.py                # FastAPI application entry point
-├── .env                       # Environment variables (create this file)
+├── .env.example               # Environment variable template (copy to .env)
 ├── .gitignore                 # Git ignore rules
-├── alembic.ini                # Alembic configuration
+├── alembic.ini                # Alembic configuration (database URL comes from .env)
 ├── requirements.txt           # Project dependencies
 └── README.md                  # This file
 ```
@@ -89,25 +93,24 @@ form_builder_backend/
     ```
 
 4.  **Configure Environment Variables:**
-    Create a `.env` file in the project root directory. Copy the contents from `.env.example` (if provided) or add the following variables, adjusting values as needed:
+    Copy the template and adjust the values:
 
-    ```dotenv
-    # .env
-    PROJECT_NAME="Formflow"
-
-    # PostgreSQL Database URL
-    # Format: postgresql+asyncpg://<user>:<password>@<host>:<port>/<database_name>
-    DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/formflow_db
-
-    # JWT Settings
-    SECRET_KEY=your_super_secret_key_change_this # Generate a strong secret key (e.g., using openssl rand -hex 32)
-    ALGORITHM=HS256
-    ACCESS_TOKEN_EXPIRE_MINUTES=60
+    ```bash
+    cp .env.example .env
     ```
-    *   Ensure the specified PostgreSQL database exists or create it.
+
+    | Variable | Description |
+    | --- | --- |
+    | `DATABASE_URL` | `postgresql+asyncpg://<user>:<password>@<host>:<port>/<database_name>` |
+    | `SECRET_KEY` | JWT signing key, generate with `openssl rand -hex 32` |
+    | `ALGORITHM` | JWT algorithm (default `HS256`) |
+    | `ACCESS_TOKEN_EXPIRE_MINUTES` | Token lifetime in minutes |
+    | `CORS_ORIGINS` | Comma-separated frontend origins allowed to call the API (default `http://localhost:3000,http://127.0.0.1:3000`) |
+
+    *   Ensure the specified PostgreSQL database exists or create it (e.g. `createdb formflow_db`).
 
 5.  **Run Database Migrations:**
-    Apply the latest database schema changes using Alembic:
+    Apply the latest database schema changes using Alembic (it reads `DATABASE_URL` from `.env`):
     ```bash
     alembic upgrade head
     ```
