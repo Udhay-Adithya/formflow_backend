@@ -32,6 +32,3 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 settings = Settings()
-
-print(f"Loaded DATABASE_URL: {settings.DATABASE_URL}")
-print(f"Loaded SECRET_KEY: {'*' * 8 if settings.SECRET_KEY else 'Not Set'}")
